@@ -1,13 +1,9 @@
-version: '3.8'
-
 services:
   runner:
-    image: youssefbrr/github-actions:latest # You can use this image or build your own
+    image: backtik-ch/self-hosted-runner:latest
     restart: always
-    environment:
-      - REPO=<owner>/<repo>
-      - REG_TOKEN=<reg-token-for-self-hosted-runner>
-      - NAME=<runner-name>
+    env_file:
+      - .env
     deploy:
       mode: replicated
       replicas: 2
