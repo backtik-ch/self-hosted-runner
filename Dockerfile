@@ -24,12 +24,6 @@ RUN apt install -y --no-install-recommends \
     docker.io \
     openssh-client
 
-# Create docker user
-ARG DOCKER_GID=998
-
-RUN groupmod -g ${DOCKER_GID} docker \
-    && useradd -m -g docker docker
-
 # Give docker user sudo access (NO PASSWORD)
 RUN echo "docker ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -47,8 +41,5 @@ RUN /home/docker/actions-runner/bin/installdependencies.sh
 
 # Copy start script
 COPY --chmod=+x start.sh /start.sh
-
-# Switch to docker user
-USER docker
 
 ENTRYPOINT ["/start.sh"]
