@@ -46,6 +46,6 @@ RUN /home/docker/actions-runner/bin/installdependencies.sh
 COPY --chmod=+x start.sh /start.sh
 
 # Switch to docker user
-USER docker
+USER root
 
 ENTRYPOINT ["/start.sh"]
