@@ -1,29 +1,11 @@
 #!/bin/bash
 
-set -e
-
-# Fix docker socket permissions
-if [ -S /var/run/docker.sock ]; then
-  DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)
-  echo "Docker socket GID: $DOCKER_GID"
-
-  groupmod -g $DOCKER_GID docker 2>/dev/null || true
-  usermod -aG docker docker
-fi
-
-# Switch to docker user
-sudo -u docker bash <<EOF
+REPO=$REPO
+REG_TOKEN=$REG_TOKEN
+NAME=$NAME
 
 cd /home/docker/actions-runner || exit
-
-# ✅ IMPORTANT: use unattended mode + required flags
-./config.sh \
-  --url https://github.com/${REPO} \
-  --token ${REG_TOKEN} \
-  --name ${NAME} \
-  --unattended \
-  --replace \
-  --work _work
+./config.sh --url https://github.com/${REPO} --token ${REG_TOKEN} --name ${NAME}
 
 cleanup() {
   echo "Removing runner..."
@@ -33,6 +15,4 @@ cleanup() {
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
 
-./run.sh
-
-EOF
+./run.sh & wait $!
