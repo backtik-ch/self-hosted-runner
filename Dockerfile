@@ -27,7 +27,7 @@ RUN apt install -y --no-install-recommends \
 # Create docker user
 ARG DOCKER_GID=998
 
-RUN groupadd -g ${DOCKER_GID} docker \
+RUN groupmod -g ${DOCKER_GID} docker \
     && useradd -m -g docker docker
 
 # Give docker user sudo access (NO PASSWORD)
