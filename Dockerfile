@@ -25,7 +25,10 @@ RUN apt install -y --no-install-recommends \
     openssh-client
 
 # Create docker user
-RUN useradd -m -g docker docker
+ARG DOCKER_GID=998
+
+RUN groupadd -g ${DOCKER_GID} docker \
+    && useradd -m -g docker docker
 
 # Give docker user sudo access (NO PASSWORD)
 RUN echo "docker ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
