@@ -6,6 +6,3 @@ services:
       - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    group_add:
-      - "${DOCKER_GID:-998}"
-    user: root
