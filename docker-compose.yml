@@ -4,13 +4,8 @@ services:
     restart: always
     env_file:
       - .env
-    deploy:
-      mode: replicated
-      replicas: 2
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.4'
-          memory: 256M
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:-998}"
+    user: root
