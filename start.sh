@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-REPO=${REPO}
-REG_TOKEN=${REG_TOKEN}
-NAME=${NAME}
+echo "Starting runner entrypoint..."
 
+# ---- FIX DOCKER SOCKET PERMISSIONS ----
 DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)
 echo "Docker socket GID: $DOCKER_GID"
 
@@ -15,30 +14,42 @@ else
 fi
 
 usermod -aG docker docker
-
-# ensure correct ownership
 chown -R docker:docker /home/docker
 
-exec su - docker -c "
+# ---- EXPORT ENV FOR CHILD ----
+export REPO
+export REG_TOKEN
+export NAME
+
+echo "Switching to docker user..."
+
+# ---- RUN AS DOCKER USER ----
+exec su - docker -c '
+set -e
+
+echo "Running as: $(whoami)"
+echo "Repo: $REPO"
+
 cd /home/docker/actions-runner || exit
 
-# Configure only if not already configured
 if [ ! -f .runner ]; then
+  echo "Configuring runner..."
   ./config.sh \
     --url https://github.com/${REPO} \
     --token ${REG_TOKEN} \
-    --name ${NAME}-\$(hostname) \
+    --name ${NAME}-$(hostname) \
     --unattended \
     --replace
 fi
 
 cleanup() {
-  echo 'Removing runner...'
+  echo "Removing runner..."
   ./config.sh remove --unattended --token ${REG_TOKEN}
 }
 
-trap 'cleanup; exit 130' INT
-trap 'cleanup; exit 143' TERM
+trap "cleanup; exit 130" INT
+trap "cleanup; exit 143" TERM
 
-./run.sh
-"
+echo "Starting runner..."
+exec ./run.sh
+'
