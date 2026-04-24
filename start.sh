@@ -41,7 +41,20 @@ fi
 
 cleanup() {
   echo 'Removing runner...'
-  ./config.sh remove --unattended --token \${REG_TOKEN}
+  ./config.sh remove --unattended --token ${REG_TOKEN} || true
+
+  echo 'Cleaning workspace...'
+  rm -rf /home/docker/actions-runner/_work/* || true
+
+  echo 'Cleaning temp...'
+  rm -rf /tmp/* || true
+
+  echo 'Cleaning caches...'
+  rm -rf /home/docker/.cache/* || true
+  rm -rf /root/.cache/* || true
+
+  echo 'Cleaning docker (if used)...'
+  docker system prune -af || true
 }
 
 trap 'cleanup; exit 130' INT
