@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-ARG RUNNER_VERSION="2.334.0"
+ARG RUNNER_VERSION="2.335.1"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # System update
