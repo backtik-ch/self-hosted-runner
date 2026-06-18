@@ -75,6 +75,16 @@ docker ps --filter name=github-runners_runner
 docker inspect --format '{{json .State.Health}}' <container_id>
 ```
 
+## Rolling Update And Rollback
+
+Swarm updates one runner at a time, waits 30 seconds between tasks, starts the replacement before stopping the old task, and rolls back automatically if the update fails:
+
+```sh
+docker service update --image ghcr.io/backtik-ch/self-hosted-runner:main github-runners_runner
+```
+
+The service also has a 2-minute stop grace period so the entrypoint can remove the runner from GitHub during cleanup.
+
 ## Files
 
 - `Dockerfile`: Builds the GitHub Actions runner image with Docker CLI access.

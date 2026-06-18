@@ -14,9 +14,24 @@ services:
       timeout: 10s
       start_period: 90s
       retries: 3
+    stop_grace_period: 2m
     deploy:
       mode: replicated
       replicas: 5
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+        failure_action: rollback
+        monitor: 2m
+        max_failure_ratio: 0
+      rollback_config:
+        parallelism: 1
+        delay: 30s
+        order: stop-first
+        failure_action: pause
+        monitor: 2m
+        max_failure_ratio: 0
       resources:
         limits:
           cpus: '0.5'
