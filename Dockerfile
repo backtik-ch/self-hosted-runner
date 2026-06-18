@@ -6,9 +6,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 # System update
 RUN apt update -y && apt upgrade -y
 
-# Install core dependencies (ADD sudo + docker!)
+# Install core dependencies
 RUN apt install -y --no-install-recommends \
-    sudo \
     curl \
     git \
     unzip \
@@ -21,29 +20,22 @@ RUN apt install -y --no-install-recommends \
     python3-venv \
     python3-dev \
     python3-pip \
-    docker.io \
     openssh-client
 
-# Create docker user
-ARG DOCKER_GID=998
-
-RUN groupmod -g ${DOCKER_GID} docker \
-    && useradd -m -g docker docker
-
-# Give docker user sudo access (NO PASSWORD)
-RUN echo "docker ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Create runner user
+RUN useradd -m runner
 
 # Setup runner
-RUN cd /home/docker && mkdir actions-runner && cd actions-runner \
+RUN cd /home/runner && mkdir actions-runner && cd actions-runner \
     && curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
     && tar xzf actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
     && rm actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 
 # Fix permissions
-RUN chown -R docker:docker /home/docker
+RUN chown -R runner:runner /home/runner
 
 # Install runner dependencies
-RUN /home/docker/actions-runner/bin/installdependencies.sh
+RUN /home/runner/actions-runner/bin/installdependencies.sh
 
 # Copy start script
 COPY --chmod=+x start.sh /start.sh

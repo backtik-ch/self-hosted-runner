@@ -36,35 +36,6 @@ fi
 : "${GITHUB_TOKEN:?GITHUB_TOKEN or GITHUB_TOKEN_FILE is required}"
 log "GitHub token is present."
 
-# ---- FIX DOCKER SOCKET PERMISSIONS ----
-log "Checking Docker socket..."
-
-if [ -S /var/run/docker.sock ]; then
-  DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)"
-  log "Docker socket found."
-  log "Docker socket GID: $DOCKER_GID"
-
-  if getent group docker >/dev/null; then
-    log "docker group exists. Updating docker group GID to ${DOCKER_GID}..."
-    groupmod -g "$DOCKER_GID" docker || true
-    log "docker group GID update finished."
-  else
-    log "docker group does not exist. Creating docker group with GID ${DOCKER_GID}..."
-    groupadd -g "$DOCKER_GID" docker
-    log "docker group created."
-  fi
-
-  log "Adding docker user to docker group..."
-  usermod -aG docker docker
-  log "docker user group membership update finished."
-else
-  log "Warning: /var/run/docker.sock not found. Docker inside jobs may not work."
-fi
-
-log "Fixing /home/docker ownership..."
-chown -R docker:docker /home/docker
-log "/home/docker ownership fixed."
-
 # ---- FUNCTION TO GET ORG REGISTRATION TOKEN ----
 get_registration_token() {
   log "Calling GitHub registration-token endpoint for org ${ORG}..."
@@ -121,7 +92,7 @@ cleanup() {
 
   log "Cleanup started..."
 
-  if [ -f /home/docker/actions-runner/.runner ]; then
+  if [ -f /home/runner/actions-runner/.runner ]; then
     log "Runner config exists. Getting GitHub org runner remove token..."
 
     REMOVE_TOKEN="$(get_remove_token || true)"
@@ -130,9 +101,9 @@ cleanup() {
       log "GitHub remove token fetched."
       log "Removing runner from GitHub..."
 
-      su - docker -c "
+      su - runner -c "
         echo '[cleanup] Running removal as:' \$(whoami)
-        cd /home/docker/actions-runner || exit 0
+        cd /home/runner/actions-runner || exit 0
         echo '[cleanup] Current directory:' \$(pwd)
         ./config.sh remove --unattended --token '${REMOVE_TOKEN}' || true
       "
@@ -145,7 +116,7 @@ cleanup() {
   fi
 
   log "Cleaning workspace..."
-  rm -rf /home/docker/actions-runner/_work/* || true
+  rm -rf /home/runner/actions-runner/_work/* || true
   log "Workspace cleaned."
 
   log "Cleaning temp..."
@@ -153,17 +124,9 @@ cleanup() {
   log "Temp cleaned."
 
   log "Cleaning caches..."
-  rm -rf /home/docker/.cache/* || true
+  rm -rf /home/runner/.cache/* || true
   rm -rf /root/.cache/* || true
   log "Caches cleaned."
-
-  if command -v docker >/dev/null 2>&1 && [ -S /var/run/docker.sock ]; then
-    log "Cleaning docker..."
-    docker system prune -af || true
-    log "Docker cleanup finished."
-  else
-    log "Docker cleanup skipped. docker command or socket unavailable."
-  fi
 
   log "Cleanup finished."
 }
@@ -190,11 +153,11 @@ stop_runner() {
 trap 'log "Received INT signal."; stop_runner 130' INT
 trap 'log "Received TERM signal."; stop_runner 143' TERM
 
-log "Switching to docker user..."
+log "Switching to runner user..."
 log "Preparing runner process..."
 
 set +e
-su - docker -c "
+su - runner -c "
   set -e
 
   echo '[runner] Shell started as:' \$(whoami)
@@ -206,8 +169,8 @@ su - docker -c "
   echo '[runner] Org:' \$ORG
   echo '[runner] Runner name:' \$RUNNER_NAME
 
-  echo '[runner] Changing directory to /home/docker/actions-runner...'
-  cd /home/docker/actions-runner
+  echo '[runner] Changing directory to /home/runner/actions-runner...'
+  cd /home/runner/actions-runner
   echo '[runner] Current directory:' \$(pwd)
 
   if [ ! -f .runner ]; then

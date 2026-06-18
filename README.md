@@ -4,6 +4,8 @@ Docker image and Compose stack for GitHub Actions self-hosted runners registered
 
 The stack runs 5 runner containers for the whole GitHub organization instead of attaching runners to individual repositories.
 
+The runners do not mount the Docker socket and do not include Docker access. They are intended for jobs that call external APIs or run regular shell tooling.
+
 ## Configuration
 
 Create a `.env` file:
@@ -87,7 +89,7 @@ The service also has a 2-minute stop grace period so the entrypoint can remove t
 
 ## Files
 
-- `Dockerfile`: Builds the GitHub Actions runner image with Docker CLI access.
+- `Dockerfile`: Builds the GitHub Actions runner image without Docker socket access.
 - `start.sh`: Reads the PAT secret, fetches an organization registration token, configures the runner, and removes it on shutdown.
 - `healthcheck.sh`: Checks that the runner is configured and running.
-- `docker-compose.yml`: Deploys 5 organization runners and mounts the Docker socket.
+- `docker-compose.yml`: Deploys 5 organization runners.

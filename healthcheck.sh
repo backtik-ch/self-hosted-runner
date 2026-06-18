@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-RUNNER_DIR="/home/docker/actions-runner"
+RUNNER_DIR="/home/runner/actions-runner"
 
 if [ ! -f "${RUNNER_DIR}/.runner" ]; then
   echo "unhealthy: runner is not configured"
