@@ -47,5 +47,9 @@ RUN /home/docker/actions-runner/bin/installdependencies.sh
 
 # Copy start script
 COPY --chmod=+x start.sh /start.sh
+COPY --chmod=+x healthcheck.sh /healthcheck.sh
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD /healthcheck.sh
 
 ENTRYPOINT ["/start.sh"]

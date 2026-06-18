@@ -168,8 +168,27 @@ cleanup() {
   log "Cleanup finished."
 }
 
-trap 'log "Received INT signal."; cleanup; exit 130' INT
-trap 'log "Received TERM signal."; cleanup; exit 143' TERM
+RUNNER_PID=""
+
+stop_runner() {
+  local signal_exit_code="$1"
+
+  log "Stop requested. Forwarding TERM to runner process..."
+
+  if [ -n "$RUNNER_PID" ] && kill -0 "$RUNNER_PID" >/dev/null 2>&1; then
+    kill -TERM "$RUNNER_PID" >/dev/null 2>&1 || true
+    wait "$RUNNER_PID" >/dev/null 2>&1 || true
+  else
+    log "Runner process is not running."
+  fi
+
+  cleanup
+  log "Entrypoint exiting with code ${signal_exit_code}."
+  exit "$signal_exit_code"
+}
+
+trap 'log "Received INT signal."; stop_runner 130' INT
+trap 'log "Received TERM signal."; stop_runner 143' TERM
 
 log "Switching to docker user..."
 log "Preparing runner process..."
@@ -208,7 +227,11 @@ su - docker -c "
 
   echo '[runner] Starting runner...'
   ./run.sh
-"
+" &
+RUNNER_PID=$!
+log "Runner process started with PID ${RUNNER_PID}."
+
+wait "$RUNNER_PID"
 EXIT_CODE=$?
 set -e
 

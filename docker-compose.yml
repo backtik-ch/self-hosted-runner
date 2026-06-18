@@ -8,6 +8,12 @@ services:
       - github_runner_pat
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
     deploy:
       mode: replicated
       replicas: 5
