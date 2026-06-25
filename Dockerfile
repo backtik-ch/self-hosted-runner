@@ -20,7 +20,12 @@ RUN apt install -y --no-install-recommends \
     python3-venv \
     python3-dev \
     python3-pip \
+    nodejs \
+    npm \
     openssh-client
+
+# Install tools used by GitHub Actions workflows
+RUN npm install -g dbdocs @dbml/cli
 
 # Create runner user
 RUN useradd -m runner
