@@ -6,6 +6,8 @@ services:
       - .env
     secrets:
       - github_runner_pat
+    extra_hosts:
+      - "staging.backtik.ch:100.85.1.1"
     healthcheck:
       test: ["CMD", "/healthcheck.sh"]
       interval: 30s
