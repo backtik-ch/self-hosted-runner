@@ -2,7 +2,7 @@
 
 Docker image and Compose stack for GitHub Actions self-hosted runners registered at organization level.
 
-The stack runs 5 runner containers for the whole GitHub organization instead of attaching runners to individual repositories.
+The stack runs 2 runner containers for the whole GitHub organization instead of attaching runners to individual repositories.
 
 The runners do not mount the Docker socket and do not include Docker access. They are intended for jobs that call external APIs or run regular shell tooling.
 
@@ -64,8 +64,8 @@ The stack declares 5 replicas:
 
 ```yaml
 deploy:
-  mode: replicated
-  replicas: 5
+    mode: replicated
+    replicas: 5
 ```
 
 ## Healthcheck
