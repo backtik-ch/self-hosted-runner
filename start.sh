@@ -181,7 +181,8 @@ su - runner -c "
       --token \${REG_TOKEN} \
       --name \${RUNNER_NAME} \
       --unattended \
-      --replace
+      --replace \
+      --disableupdate
 
     echo '[runner] Runner configuration finished.'
   else
