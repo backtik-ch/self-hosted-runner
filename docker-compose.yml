@@ -1,6 +1,6 @@
 services:
   runner:
-    image: ghcr.io/backtik-ch/self-hosted-runner:latest
+    image: ghcr.io/backtik-ch/self-hosted-runner:main
     restart: always
     env_file:
       - .env
