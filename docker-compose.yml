@@ -7,6 +7,7 @@ services:
     secrets:
       - github_runner_pat
     extra_hosts:
+      - "internal.backtik.ch:100.85.1.1"
       - "staging.backtik.ch:100.85.1.1"
       - "dokploy.backtik.ch:100.85.1.1"
     healthcheck:
